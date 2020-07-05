@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Task</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+        <style>
+            .hovered{
+                background-color: rgb(187, 186, 186) !important;
+            }
+            body{
+                background-color: rgb(243, 243, 243);
+            }
+            #curve{
+                width: 300px;
+                height: 150px;
+            }
+            #areaDrop{
+                width: 620px;
+                height: 155px;
+                border: 2px solid red;
+            }
+            #canvasDrop{
+                height: inherit;
+                width: inherit;
+            }
+            .dragdrop{
+                display: flex;
+                justify-content: center;
+            }
+
+        </style>
+
+    </head>
+    <body>
+        <div class="bg-info p-3 text-center text-dark"><h1>Chart Task</h1></div>
+        <div class="container" id="content">
+            <div class="row">
+                <div class="col-md-12 bg-success mb-3 text-center text-white">
+                    <h2>You can drag chart from right after drop it in drop area</h2>
+                </div>
+
+                <div class="col-md-4" id="areaDrag">
+                    <canvas id="curve" class='bg-dark'></canvas>
+                </div>
+                
+                <div class="col-md-8" >
+                    <div class="bg-dark" id='areaDrop'>
+                        <canvas id="canvasDrop"></canvas>
+                    </div>
+                </div>
+
+                <div class="col-md-4 text-center text-danger dragdrop  mt-3 ">
+                    <i class="fa fa-arrow-circle-up fa-3x mr-4" aria-hidden="true"></i>
+                    <h1>Drag</h1>
+                </div>
+
+                <div class="col-md-8 text-success dragdrop  mt-3 ">
+                    <i class="fa fa-arrow-circle-up fa-3x mr-4" aria-hidden="true"></i>
+                    <h1>Drop</h1>
+                </div>
+            </div>
+        </div>
+        
+        
+<script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js'></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        
+<script>
+
+        $('#areaDrag').draggable({
+            stack: '#areaDrag canvas',
+            cursor: 'move',
+            revert: true
+    });
+
+    $('#areaDrop').droppable( {
+                accept: '#areaDrag ',
+                hoverClass: 'hovered',
+                drop: handlecanvasDrop
+                } );
+
+    // line chart data
+    var curveData = {
+        labels : ["January","February","March","April","May","June"],
+        datasets : [
+        {
+            width:null,
+            fillColor : "rgba(172,194,132,0.4)",
+            strokeColor : "#ACC26D",
+            pointColor : "#fff",
+            pointStrokeColor : "#9DB86D",
+            data : [203,156,99,251,305,247]
+        }
+    ]
+    }
+    // get line chart canvas
+    var curve = document.getElementById('curve').getContext('2d');
+    // draw line chart
+    new Chart(curve).Line(curveData);
+
+    function handlecanvasDrop(event, ui) {
+
+        ui.draggable.draggable('disable');
+        $(this).droppable('disable');
+        ui.draggable.position({
+        of: $(this), my: 'left top', at: 'left top'
+        });
+        ui.draggable.draggable('option', 'revert', false);
+
+        $('.dragdrop').hide();
+    
+        $("#curve").resizable({handles:'e',maxWidth: 600 ,
+        stop: function(event, ui) { 
+        changeChartWidth($(event.target).width())
+        }
+        })
+        changeChartWidth (null)
+    }
+
+    let chartData = JSON.parse(localStorage.getItem("chart"));
+    let newCanvas = document.getElementById('canvasDrop').getContext('2d');
+
+    if (chartData)
+    {
+        document.getElementById('areaDrag').innerHTML = '';
+        new Chart(newCanvas).Line(chartData);
+        setChartwidth(chartData.datasets[0].width);
+        $('.dragdrop').hide();
+
+        $('#canvasDrop').resizable({handles:'e',maxWidth: 600,
+        stop: function(event, ui) { 
+            changeChartWidth($(event.target).width());
+            setChartwidth($(event.target).width())
+        } });
+    }
+
+    // change width in localStorage when dragging chart
+    function changeChartWidth (newWidth)
+    {
+        curveData.datasets[0].width = newWidth;
+        localStorage.setItem('chart', JSON.stringify(curveData));
+    }
+
+    // set chart's width in Dom
+    function setChartwidth (myNewWidth)
+    {
+        $('#canvasDrop').width(myNewWidth)
+    }
+
+</script>
+        
+    </body>
+</html>
